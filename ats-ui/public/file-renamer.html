@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Renamer - ATS Application</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .file-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .file-info h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        .file-info p {
+            margin: 5px 0;
+            color: #34495e;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #229954;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .file-drop-zone {
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .file-drop-zone.dragover {
+            border-color: #3498db;
+            background: #ebf3fd;
+        }
+        .file-drop-zone p {
+            margin: 0;
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        .file-drop-zone .icon {
+            font-size: 48px;
+            color: #bdc3c7;
+            margin-bottom: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 File Renamer</h1>
+            <p>Rename files while preserving content and format</p>
+        </div>
+
+        <div class="file-drop-zone" id="dropZone">
+            <div class="icon">📄</div>
+            <p>Drag & drop a file here or click to browse</p>
+            <input type="file" id="fileInput" class="hidden" accept="*/*">
+        </div>
+
+        <div class="file-info hidden" id="fileInfo">
+            <h3>Selected File</h3>
+            <p><strong>Name:</strong> <span id="fileName"></span></p>
+            <p><strong>Size:</strong> <span id="fileSize"></span></p>
+            <p><strong>Type:</strong> <span id="fileType"></span></p>
+        </div>
+
+        <form id="renameForm" class="hidden">
+            <div class="form-group">
+                <label for="companyName">Company Name:</label>
+                <input type="text" id="companyName" placeholder="Enter company name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="roleName">Role/Position:</label>
+                <input type="text" id="roleName" placeholder="Enter role or position" required>
+            </div>
+
+            <div class="form-group">
+                <label for="userName">User Name:</label>
+                <input type="text" id="userName" placeholder="Enter user name (optional)">
+            </div>
+
+            <div class="form-group">
+                <label for="newFileName">New File Name:</label>
+                <input type="text" id="newFileName" readonly>
+                <small>This will be automatically generated based on your inputs</small>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">💾 Save & Download</button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">🗑️ Clear</button>
+            </div>
+        </form>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let originalExtension = '';
+
+        // File drop zone functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            originalExtension = getFileExtension(file.name);
+            
+            // Display file info
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileType').textContent = file.type || 'Unknown';
+            document.getElementById('fileInfo').classList.remove('hidden');
+            
+            // Show rename form
+            document.getElementById('renameForm').classList.remove('hidden');
+            
+            // Update drop zone
+            dropZone.innerHTML = `
+                <div class="icon">✅</div>
+                <p>File selected: ${file.name}</p>
+            `;
+            
+            updateNewFileName();
+        }
+
+        function getFileExtension(filename) {
+            const lastDot = filename.lastIndexOf('.');
+            return lastDot > 0 ? filename.substring(lastDot) : '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateNewFileName() {
+            const company = document.getElementById('companyName').value.trim();
+            const role = document.getElementById('roleName').value.trim();
+            const user = document.getElementById('userName').value.trim();
+            
+            let newName = '';
+            if (company) newName += company;
+            if (role) newName += (newName ? '_' : '') + role;
+            if (user) newName += (newName ? '_' : '') + user;
+            
+            if (newName) {
+                newName += originalExtension;
+            }
+            
+            document.getElementById('newFileName').value = newName;
+        }
+
+        // Form event listeners
+        document.getElementById('companyName').addEventListener('input', updateNewFileName);
+        document.getElementById('roleName').addEventListener('input', updateNewFileName);
+        document.getElementById('userName').addEventListener('input', updateNewFileName);
+
+        document.getElementById('renameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedFile) {
+                showStatus('Please select a file first.', 'error');
+                return;
+            }
+
+            const company = document.getElementById('companyName').value.trim();
+            const role = document.getElementById('roleName').value.trim();
+            
+            if (!company || !role) {
+                showStatus('Please fill in company name and role.', 'error');
+                return;
+            }
+
+            try {
+                await processFile(selectedFile, company, role);
+            } catch (error) {
+                showStatus('Error processing file: ' + error.message, 'error');
+            }
+        });
+
+        async function processFile(file, company, role) {
+            showStatus('Processing file...', 'info');
+            
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('companyName', company);
+            formData.append('roleName', role);
+            
+            try {
+                // Upload to backend API
+                const response = await fetch('/api/file-renamer/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to process file');
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('File processed successfully!', 'success');
+                    
+                    // Download the renamed file
+                    await downloadRenamedFile(file, company, role);
+                    
+                } else {
+                    throw new Error(result.error || 'Processing failed');
+                }
+                
+            } catch (error) {
+                throw new Error('Failed to process file: ' + error.message);
+            }
+        }
+
+        async function downloadRenamedFile(file, company, role) {
+            try {
+                showStatus('Preparing download...', 'info');
+                
+                // Create FormData for download request
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('companyName', company);
+                formData.append('roleName', role);
+                
+                // Request download from backend
+                const response = await fetch('/api/file-renamer/download', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+                
+                // Get the filename from response headers
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = 'renamed_file';
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                
+                // Create blob and download
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Clean up
+                URL.revokeObjectURL(downloadUrl);
+                
+                showStatus(`File downloaded successfully as: ${filename}`, 'success');
+                
+            } catch (error) {
+                showStatus('Download failed: ' + error.message, 'error');
+            }
+        }
+
+        async function downloadUsingFileSystem() {
+            if (!selectedFile) {
+                showStatus('Please select a file first', 'error');
+                return;
+            }
+
+            const companyName = document.getElementById('companyName').value.trim();
+            const roleName = document.getElementById('roleName').value.trim();
+            const userName = document.getElementById('userName').value.trim();
+
+            if (!companyName || !roleName) {
+                showStatus('Please fill in company name and role', 'error');
+                return;
+            }
+
+            showStatus('Processing and downloading file using FileSystem approach...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('companyName', companyName);
+            formData.append('roleName', roleName);
+            if (userName) {
+                formData.append('userName', userName);
+            }
+            
+            try {
+                const response = await fetch('/api/file-renamer/download', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('FileSystem download failed');
+                }
+                
+                // Get filename from response headers
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = generatePreviewName();
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                    if (filenameMatch) {
+                        filename = decodeURIComponent(filenameMatch[1]);
+                    } else {
+                        const simpleMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (simpleMatch) {
+                            filename = simpleMatch[1];
+                        }
+                    }
+                }
+                
+                // Create blob and download
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Clean up
+                URL.revokeObjectURL(downloadUrl);
+                
+                showStatus('✅ File downloaded successfully using FileSystem approach!', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ FileSystem download failed: ${error.message}`, 'error');
+            }
+        }
+
+        function clearForm() {
+            selectedFile = null;
+            originalExtension = '';
+            
+            // Reset form fields
+            document.getElementById('companyName').value = '';
+            document.getElementById('roleName').value = '';
+            document.getElementById('userName').value = '';
+            document.getElementById('newFileName').value = '';
+            
+            // Hide sections
+            document.getElementById('fileInfo').classList.add('hidden');
+            document.getElementById('renameForm').classList.add('hidden');
+            
+            // Reset drop zone
+            dropZone.innerHTML = `
+                <div class="icon">📄</div>
+                <p>Drag & drop a file here or click to browse</p>
+                <input type="file" id="fileInput" class="hidden" accept="*/*">
+            `;
+            
+            // Clear status
+            document.getElementById('status').classList.add('hidden');
+            
+            // Re-attach event listeners
+            dropZone.addEventListener('click', () => fileInput.click());
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

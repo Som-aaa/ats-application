@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Download Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px; }
+        textarea { height: 100px; }
+    </style>
+</head>
+<body>
+    <h1>Resume Download Test & Debug</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Resume File Storage</h3>
+        <p>First, let's check if resume files are being stored correctly:</p>
+        <input type="number" id="jdIndex" placeholder="Enter JD Index (0, 1, 2...)" value="0">
+        <button onclick="testContent()">Test File Storage</button>
+        <div id="contentResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Debug Resume Match</h3>
+        <p>Check the details of a specific resume match:</p>
+        <button onclick="debugMatch()">Debug Match</button>
+        <div id="debugResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Manually Set Resume File</h3>
+        <p>If file is missing, manually set it for testing:</p>
+        <input type="text" id="matchId" placeholder="Enter Match ID">
+        <textarea id="resumeContent" placeholder="Enter resume content here...">Sample Resume Content
+John Doe
+Software Engineer
+Experience: 5 years
+Skills: Java, Spring Boot, React</textarea>
+        <button onclick="setContent()">Set File Content</button>
+        <div id="setContentResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Test Download</h3>
+        <p>Try downloading the resume after setting content:</p>
+        <button onclick="testDownload()">Test Download</button>
+        <div id="downloadResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>5. View All Matches</h3>
+        <p>See all available resume matches:</p>
+        <button onclick="viewAllMatches()">View All Matches</button>
+        <div id="allMatchesResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/resume-matches';
+        
+        async function testContent() {
+            const jdIndex = document.getElementById('jdIndex').value;
+            try {
+                const response = await fetch(`${API_BASE}/test-content/${jdIndex}`);
+                const result = await response.text();
+                document.getElementById('contentResult').innerHTML = `<pre>${result}</pre>`;
+            } catch (error) {
+                document.getElementById('contentResult').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        async function debugMatch() {
+            const jdIndex = document.getElementById('jdIndex').value;
+            try {
+                const response = await fetch(`${API_BASE}/debug/${jdIndex}`);
+                const result = await response.json();
+                document.getElementById('debugResult').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('debugResult').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        async function setContent() {
+            const matchId = document.getElementById('matchId').value;
+            const content = document.getElementById('resumeContent').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/set-content/${matchId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const result = await response.json();
+                document.getElementById('setContentResult').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('setContentResult').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testDownload() {
+            const jdIndex = document.getElementById('jdIndex').value;
+            try {
+                const response = await fetch(`${API_BASE}/job-description/${jdIndex}/download-best`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `test-download-jd${jdIndex}.txt`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    document.getElementById('downloadResult').innerHTML = 'Download successful! Check your downloads folder.';
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('downloadResult').innerHTML = `Download failed: ${errorText}`;
+                }
+            } catch (error) {
+                document.getElementById('downloadResult').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        async function viewAllMatches() {
+            try {
+                const response = await fetch(`${API_BASE}/all`);
+                const result = await response.json();
+                document.getElementById('allMatchesResult').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('allMatchesResult').innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

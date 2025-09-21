@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modified ATS API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+        .info {
+            border-left: 4px solid #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Modified ATS API</h1>
+    <p>This page tests the new functionality: resume renaming, company/role extraction, and matched resume filtering.</p>
+
+    <div class="test-section">
+        <h2>📋 Test Mode 2 (Single Resume + Job Description)</h2>
+        <p>Tests the new prompt that extracts company name and role from job description.</p>
+        <button class="test-button" onclick="testMode2()">Test Mode 2</button>
+        <div id="mode2-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Mode 3 (Bulk Resume Analysis)</h2>
+        <p>Tests bulk analysis with matched resume filtering and new resume names.</p>
+        <button class="test-button" onclick="testMode3()">Test Mode 3</button>
+        <div id="mode3-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Test Mode 4 (Bulk JD Analysis)</h2>
+        <p>Tests bulk JD analysis with matched resume filtering and new resume names.</p>
+        <button class="test-button" onclick="testMode4()">Test Mode 4</button>
+        <div id="mode4-result" class="result"></div>
+    </div>
+
+            <div class="test-section">
+            <h2>📝 Sample Job Descriptions (3-Column Format)</h2>
+            <p>Your Excel file should have this structure for optimal resume renaming:</p>
+            <div class="result info">
+                <strong>Column A (Company):</strong> Markforged, Microsoft, Apple, Google
+                
+                <strong>Column B (Role):</strong> Software Engineer II, Data Scientist, Product Manager, Senior Software Engineer
+                
+                <strong>Column C (Description):</strong> Detailed job requirements and responsibilities
+                
+                <strong>Example Row:</strong>
+                Markforged | Software Engineer II | The text describes Markforged as a company leading the digital transformation of manufacturing by revolutionizing how engineers and manufacturers create and innovate. Their platform combines software, advanced materials (including cutting-edge metal and composite technologies), and industrial 3D printers to deliver strong, lightweight parts.
+                
+                <strong>Expected Resume Naming:</strong>
+                Saikrishna_Markforged_SoftwareEngineerII_123456
+                
+                <strong>Note:</strong> Only the best match resume for each job description gets renamed.
+            </div>
+        </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        function showResult(elementId, data, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = `result ${type}`;
+        }
+
+        function showError(elementId, error) {
+            showResult(elementId, { error: error.message || error }, 'error');
+        }
+
+        async function testMode2() {
+            const resultDiv = document.getElementById('mode2-result');
+            resultDiv.textContent = 'Testing Mode 2...';
+            
+            try {
+                // Create a simple text file for testing
+                const resumeText = "John Doe\nSoftware Engineer\n5 years experience in Java, Spring Boot\nWorked at TechCorp and StartupXYZ\nSkills: Java, Spring, REST APIs, MySQL";
+                const resumeBlob = new Blob([resumeText], { type: 'text/plain' });
+                const resumeFile = new File([resumeBlob], 'test-resume.txt', { type: 'text/plain' });
+
+                const formData = new FormData();
+                formData.append('resume', resumeFile);
+                formData.append('jd', 'Senior Software Engineer at Google Inc. We are looking for a talented developer with 5+ years of experience in Java, Spring Boot, and microservices architecture.');
+
+                const response = await fetch(`${API_BASE}/mode2`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                showResult('mode2-result', result, 'success');
+            } catch (error) {
+                showError('mode2-result', error);
+            }
+        }
+
+        async function testMode3() {
+            const resultDiv = document.getElementById('mode3-result');
+            resultDiv.textContent = 'Testing Mode 3...';
+            
+            try {
+                // Create sample resume files
+                const resume1Text = "Alice Smith\nSenior Developer\n7 years experience in Java, Spring\nWorked at BigTech and StartupABC\nSkills: Java, Spring, Microservices, AWS";
+                const resume2Text = "Bob Johnson\nJunior Developer\n2 years experience in Python\nWorked at SmallTech\nSkills: Python, Django, SQL";
+                
+                const resume1Blob = new Blob([resume1Text], { type: 'text/plain' });
+                const resume2Blob = new Blob([resume2Text], { type: 'text/plain' });
+                
+                const resume1File = new File([resume1Blob], 'alice-resume.txt', { type: 'text/plain' });
+                const resume2File = new File([resume2Blob], 'bob-resume.txt', { type: 'text/plain' });
+
+                const formData = new FormData();
+                formData.append('resumes', resume1File);
+                formData.append('resumes', resume2File);
+                formData.append('jd', 'Senior Software Engineer at Google Inc. We are looking for a talented developer with 5+ years of experience in Java, Spring Boot, and microservices architecture.');
+
+                const response = await fetch(`${API_BASE}/mode3`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                showResult('mode3-result', result, 'success');
+            } catch (error) {
+                showError('mode3-result', error);
+            }
+        }
+
+        async function testMode4() {
+            const resultDiv = document.getElementById('mode4-result');
+            resultDiv.textContent = 'Testing Mode 4...';
+            
+            try {
+                // Create sample resume files
+                const resume1Text = "Alice Smith\nSenior Developer\n7 years experience in Java, Spring\nWorked at BigTech and StartupABC\nSkills: Java, Spring, Microservices, AWS";
+                const resume1Blob = new Blob([resume1Text], { type: 'text/plain' });
+                const resume1File = new File([resume1Blob], 'alice-resume.txt', { type: 'text/plain' });
+
+                // Create sample Excel file with 3-column format (Company, Role, Description)
+                const csvContent = "CompanyName,Role,Description\n" +
+                    "Markforged,Software Engineer II,The text describes Markforged as a company leading the digital transformation of manufacturing by revolutionizing how engineers and manufacturers create and innovate. Their platform combines software, advanced materials (including cutting-edge metal and composite technologies), and industrial 3D printers to deliver strong, lightweight parts.\n" +
+                    "Microsoft,Data Scientist,We need a specialist in machine learning, Python programming, and statistical analysis. Must have experience with pandas, scikit-learn, and data visualization tools. Knowledge of SQL, big data technologies, and business intelligence tools preferred.\n" +
+                    "Apple,Product Manager,We are seeking a product leader with 3+ years experience in agile methodologies, user research, and product strategy. Must have strong analytical skills, experience with product analytics tools, and ability to work with cross-functional teams. Technical background is a plus.";
+                
+                const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+                const csvFile = new File([csvBlob], 'job-descriptions-3columns.csv', { type: 'text/csv' });
+
+                const formData = new FormData();
+                formData.append('resumes', resume1File);
+                formData.append('jobDescriptions', csvFile);
+
+                const response = await fetch(`${API_BASE}/mode4`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                showResult('mode4-result', result, 'success');
+            } catch (error) {
+                showError('mode4-result', error);
+            }
+        }
+    </script>
+</body>
+</html>

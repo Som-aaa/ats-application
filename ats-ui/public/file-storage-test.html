@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📁 File Storage Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            color: #2196f3;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            background: #e3f2fd;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #2196f3;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .btn {
+            background: #2196f3;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #1976d2;
+        }
+        .btn-success {
+            background: #4caf50;
+        }
+        .btn-success:hover {
+            background: #388e3c;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #c8e6c9;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        .status.error {
+            background: #ffcdd2;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        .status.info {
+            background: #bbdefb;
+            color: #1565c0;
+            border: 1px solid #2196f3;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .input-group input {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 File Storage Test</h1>
+            <h2>Test the New Physical File Storage System</h2>
+            <p>This page tests storing files physically and downloading them with proper renaming.</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Storage Information</h3>
+            <p>Check the current storage directory and status.</p>
+            <button class="btn btn-success" onclick="getStorageInfo()">
+                📊 Get Storage Info
+            </button>
+            <div id="storageInfo" style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 5px; display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📥 Test File Upload & Storage</h3>
+            <p>Upload a file to test the storage system.</p>
+            
+            <div class="file-input">
+                <input type="file" id="testFileInput" accept="*/*">
+                <p>Choose any file (PDF, DOC, etc.) to test storage</p>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="testCompany" placeholder="Company Name" value="TestCompany">
+                <input type="text" id="testRole" placeholder="Role Name" value="TestRole">
+                <input type="text" id="testUser" placeholder="User Name (optional)" value="TestUser">
+            </div>
+            
+            <button class="btn" onclick="testFileStorage()">
+                📁 Test File Storage
+            </button>
+        </div>
+
+        <div class="test-section">
+            <h3>📤 Test File Download</h3>
+            <p>Test downloading a stored file with custom naming.</p>
+            
+            <div class="input-group">
+                <input type="text" id="downloadCompany" placeholder="Company Name" value="DownloadCompany">
+                <input type="text" id="downloadRole" placeholder="Role Name" value="DownloadRole">
+                <input type="text" id="downloadUser" placeholder="User Name (optional)" value="DownloadUser">
+            </div>
+            
+            <button class="btn btn-success" onclick="testFileDownload()">
+                📥 Test File Download
+            </button>
+        </div>
+
+        <div class="status" id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let testFile = null;
+
+        document.getElementById('testFileInput').addEventListener('change', function(e) {
+            testFile = e.target.files[0];
+            if (testFile) {
+                showStatus(`Test file selected: ${testFile.name} (${testFile.size} bytes)`, 'info');
+            }
+        });
+
+        async function getStorageInfo() {
+            showStatus('🔍 Getting storage information...', 'info');
+            
+            try {
+                const response = await fetch('/api/resume-download/storage-info');
+                if (!response.ok) {
+                    throw new Error('Failed to get storage info');
+                }
+                
+                const info = await response.text();
+                document.getElementById('storageInfo').textContent = info;
+                document.getElementById('storageInfo').style.display = 'block';
+                
+                showStatus('✅ Storage info retrieved successfully!', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Failed to get storage info: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFileStorage() {
+            if (!testFile) {
+                showStatus('Please select a file first!', 'error');
+                return;
+            }
+
+            const companyName = document.getElementById('testCompany').value.trim();
+            const roleName = document.getElementById('testRole').value.trim();
+            const userName = document.getElementById('testUser').value.trim();
+
+            if (!companyName || !roleName) {
+                showStatus('Please fill in company name and role!', 'error');
+                return;
+            }
+
+            showStatus('📁 Testing file storage...', 'info');
+            
+            // For now, we'll simulate storage by calling the process endpoint
+            const formData = new FormData();
+            formData.append('file', testFile);
+            formData.append('companyName', companyName);
+            formData.append('roleName', roleName);
+            if (userName) {
+                formData.append('userName', userName);
+            }
+            
+            try {
+                const response = await fetch('/api/file-renamer/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('File storage failed');
+                }
+                
+                const result = await response.json();
+                showStatus('✅ File storage test completed! Check console for details.', 'success');
+                console.log('Storage result:', result);
+                
+            } catch (error) {
+                showStatus(`❌ File storage test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFileDownload() {
+            const companyName = document.getElementById('downloadCompany').value.trim();
+            const roleName = document.getElementById('downloadRole').value.trim();
+            const userName = document.getElementById('downloadUser').value.trim();
+
+            if (!companyName || !roleName) {
+                showStatus('Please fill in company name and role!', 'error');
+                return;
+            }
+
+            showStatus('📥 Testing file download...', 'info');
+            
+            try {
+                // Test download from JD index 0 (assuming we have stored files)
+                const url = `/api/resume-download/best-match/0?companyName=${encodeURIComponent(companyName)}&roleName=${encodeURIComponent(roleName)}`;
+                if (userName) {
+                    url += `&userName=${encodeURIComponent(userName)}`;
+                }
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showStatus('ℹ️ No stored files found. Upload some files first using the storage test.', 'info');
+                    } else {
+                        throw new Error('Download failed');
+                    }
+                    return;
+                }
+                
+                // Get filename from response headers
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = 'downloaded_file';
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(downloadUrl);
+                
+                showStatus('✅ File download test completed! Check if the file opens correctly.', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ File download test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

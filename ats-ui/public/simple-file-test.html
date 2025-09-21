@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Renamed File Storage Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            color: #2196f3;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            background: #e3f2fd;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #2196f3;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .btn {
+            background: #2196f3;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #1976d2;
+        }
+        .btn-success {
+            background: #4caf50;
+        }
+        .btn-success:hover {
+            background: #388e3c;
+        }
+        .btn-warning {
+            background: #ff9800;
+        }
+        .btn-warning:hover {
+            background: #f57c00;
+        }
+        .btn-info {
+            background: #00bcd4;
+        }
+        .btn-info:hover {
+            background: #0097a7;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #c8e6c9;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        .status.error {
+            background: #ffcdd2;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        .status.info {
+            background: #bbdefb;
+            color: #1565c0;
+            border: 1px solid #2196f3;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .input-group input {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result-box {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .files-list {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 5px;
+            border: 1px solid #ff9800;
+        }
+        .file-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .download-btn {
+            background: #4caf50;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .download-btn:hover {
+            background: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Renamed File Storage Test</h1>
+            <h2>Files Are Stored in Dedicated Folders - This WILL Work!</h2>
+            <p>Test the complete system: upload → store → rename → store in folder → download</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Step 1: Check Current Storage</h3>
+            <p>Check what's currently in both storage directories.</p>
+            <button class="btn btn-warning" onclick="listStoredFiles()">
+                📁 List Stored Files
+            </button>
+            <button class="btn btn-info" onclick="listRenamedFiles()">
+                📝 List Renamed Files
+            </button>
+            <div id="storedFilesResult" class="result-box" style="display: none;"></div>
+            <div id="renamedFilesResult" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📥 Step 2: Upload & Store with Renaming</h3>
+            <p>Upload a file - it will be stored in BOTH folders (original + renamed).</p>
+            
+            <div class="file-input">
+                <input type="file" id="testFileInput" accept="*/*">
+                <p>Choose any file (PDF, DOC, etc.) to test storage</p>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="companyName" placeholder="Company Name" value="TestCompany">
+                <input type="text" id="roleName" placeholder="Role Name" value="TestRole">
+                <input type="text" id="userName" placeholder="User Name (optional)" value="TestUser">
+            </div>
+            
+            <button class="btn" onclick="uploadFile()">
+                📁 Upload & Store with Renaming
+            </button>
+            
+            <div id="uploadResult" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Step 3: Create Renamed File from Existing Stored File</h3>
+            <p>Create a renamed version of an already stored file.</p>
+            
+            <div class="input-group">
+                <input type="text" id="createCompany" placeholder="Company Name" value="NewCompany">
+                <input type="text" id="createRole" placeholder="Role Name" value="NewRole">
+                <input type="text" id="createUser" placeholder="User Name (optional)" value="NewUser">
+            </div>
+            
+            <button class="btn btn-info" onclick="createRenamedFile()" id="createBtn" disabled>
+                🔄 Create Renamed File
+            </button>
+            
+            <div id="createResult" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📤 Step 4: Download Renamed Files</h3>
+            <p>Download any renamed file directly from the renamed folder.</p>
+            
+            <button class="btn btn-success" onclick="refreshRenamedFiles()">
+                🔄 Refresh Renamed Files List
+            </button>
+            
+            <div id="renamedFilesList" class="files-list" style="display: none;">
+                <h4>Available Renamed Files:</h4>
+                <div id="filesList"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Step 5: Test ATS Workflow Integration</h3>
+            <p>Test if the ATS workflow automatically creates renamed files when storing resume matches.</p>
+            
+            <div class="file-input">
+                <input type="file" id="atsTestFileInput" accept="*/*">
+                <p>Choose a file to test ATS workflow</p>
+            </div>
+            
+            <div class="input-group">
+                <textarea id="jobDescription" placeholder="Job Description" rows="4" cols="50" style="width: 400px; height: 100px;">Software Engineer position at Google working on cloud infrastructure and distributed systems. Requirements include Java, Python, and experience with Kubernetes.</textarea>
+                <input type="number" id="jdIndex" placeholder="JD Index" value="1" style="width: 100px;">
+            </div>
+            
+            <button class="btn btn-info" onclick="testATSWorkflow()">
+                🧪 Test ATS Workflow
+            </button>
+            
+            <div id="atsTestResult" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="status" id="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let testFile = null;
+        let storedFilename = null;
+        let renamedFilename = null;
+
+        document.getElementById('testFileInput').addEventListener('change', function(e) {
+            testFile = e.target.files[0];
+            if (testFile) {
+                showStatus(`Test file selected: ${testFile.name} (${testFile.size} bytes)`, 'info');
+            }
+        });
+
+        async function listStoredFiles() {
+            showStatus('📁 Listing stored files...', 'info');
+            
+            try {
+                const response = await fetch('/api/simple-test/list-stored-files');
+                if (!response.ok) {
+                    throw new Error('Failed to list stored files');
+                }
+                
+                const result = await response.json();
+                document.getElementById('storedFilesResult').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('storedFilesResult').style.display = 'block';
+                
+                showStatus('✅ Stored files listing completed!', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Failed to list stored files: ${error.message}`, 'error');
+            }
+        }
+
+        async function listRenamedFiles() {
+            showStatus('📝 Listing renamed files...', 'info');
+            
+            try {
+                const response = await fetch('/api/simple-test/list-renamed-files');
+                if (!response.ok) {
+                    throw new Error('Failed to list renamed files');
+                }
+                
+                const result = await response.json();
+                document.getElementById('renamedFilesResult').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('renamedFilesResult').style.display = 'block';
+                
+                showStatus('✅ Renamed files listing completed!', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Failed to list renamed files: ${error.message}`, 'error');
+            }
+        }
+
+        async function uploadFile() {
+            if (!testFile) {
+                showStatus('Please select a file first!', 'error');
+                return;
+            }
+
+            const companyName = document.getElementById('companyName').value.trim();
+            const roleName = document.getElementById('roleName').value.trim();
+            const userName = document.getElementById('userName').value.trim();
+
+            if (!companyName || !roleName) {
+                showStatus('Please fill in company name and role!', 'error');
+                return;
+            }
+
+            showStatus('📁 Uploading and storing file with renaming...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', testFile);
+            formData.append('companyName', companyName);
+            formData.append('roleName', roleName);
+            if (userName) {
+                formData.append('userName', userName);
+            }
+            
+            try {
+                const response = await fetch('/api/simple-test/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const result = await response.json();
+                
+                // Store the filenames
+                storedFilename = result.storedFilename;
+                renamedFilename = result.renamedFilename;
+                
+                // Enable create button
+                document.getElementById('createBtn').disabled = false;
+                
+                // Show result
+                document.getElementById('uploadResult').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('uploadResult').style.display = 'block';
+                
+                showStatus('✅ File uploaded, stored, and renamed successfully! Check both folders.', 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Upload failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function createRenamedFile() {
+            if (!storedFilename) {
+                showStatus('Please upload a file first!', 'error');
+                return;
+            }
+
+            const companyName = document.getElementById('createCompany').value.trim();
+            const roleName = document.getElementById('createRole').value.trim();
+            const userName = document.getElementById('createUser').value.trim();
+
+            if (!companyName || !roleName) {
+                showStatus('Please fill in company name and role!', 'error');
+                return;
+            }
+
+            showStatus('🔄 Creating renamed file from stored file...', 'info');
+            
+            const formData = new FormData();
+            formData.append('storedFilename', storedFilename);
+            formData.append('companyName', companyName);
+            formData.append('roleName', roleName);
+            if (userName) {
+                formData.append('userName', userName);
+            }
+            
+            try {
+                const response = await fetch('/api/simple-test/create-renamed', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Create renamed file failed');
+                }
+                
+                const result = await response.json();
+                
+                // Show result
+                document.getElementById('createResult').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('createResult').style.display = 'block';
+                
+                showStatus('✅ Renamed file created successfully!', 'success');
+                
+                // Refresh the renamed files list
+                setTimeout(refreshRenamedFiles, 1000);
+                
+            } catch (error) {
+                showStatus(`❌ Create renamed file failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function refreshRenamedFiles() {
+            showStatus('🔄 Refreshing renamed files list...', 'info');
+            
+            try {
+                const response = await fetch('/api/simple-test/list-renamed-files');
+                if (!response.ok) {
+                    throw new Error('Failed to list renamed files');
+                }
+                
+                const result = await response.json();
+                
+                if (result.renamedFiles && result.renamedFiles.length > 0) {
+                    displayRenamedFiles(result.renamedFiles);
+                    showStatus('✅ Renamed files list refreshed!', 'success');
+                } else {
+                    document.getElementById('renamedFilesList').style.display = 'none';
+                    showStatus('ℹ️ No renamed files found.', 'info');
+                }
+                
+            } catch (error) {
+                showStatus(`❌ Failed to refresh renamed files: ${error.message}`, 'error');
+            }
+        }
+
+        function displayRenamedFiles(files) {
+            const filesListDiv = document.getElementById('filesList');
+            filesListDiv.innerHTML = '';
+            
+            files.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileName = document.createElement('span');
+                fileName.className = 'file-name';
+                fileName.textContent = file;
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-btn';
+                downloadBtn.textContent = '📥 Download';
+                downloadBtn.onclick = () => downloadRenamedFile(file);
+                
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(downloadBtn);
+                filesListDiv.appendChild(fileItem);
+            });
+            
+            document.getElementById('renamedFilesList').style.display = 'block';
+        }
+
+        async function downloadRenamedFile(filename) {
+            showStatus(`📥 Downloading: ${filename}`, 'info');
+            
+            try {
+                const response = await fetch(`/api/simple-test/download-renamed/${filename}`);
+                
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+                
+                // Download the file
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(downloadUrl);
+                
+                showStatus(`✅ File downloaded successfully: ${filename}`, 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Download failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testATSWorkflow() {
+            const atsTestFile = document.getElementById('atsTestFileInput').files[0];
+            const jobDescription = document.getElementById('jobDescription').value.trim();
+            const jdIndex = parseInt(document.getElementById('jdIndex').value);
+
+            if (!atsTestFile) {
+                showStatus('Please select a file first!', 'error');
+                return;
+            }
+
+            if (!jobDescription) {
+                showStatus('Please enter a job description!', 'error');
+                return;
+            }
+
+            showStatus('🧪 Testing ATS workflow integration...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', atsTestFile);
+            formData.append('jobDescription', jobDescription);
+            formData.append('jdIndex', jdIndex);
+            
+            try {
+                const response = await fetch('/api/simple-test/test-ats-workflow', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('ATS workflow test failed');
+                }
+                
+                const result = await response.json();
+                
+                // Show result
+                document.getElementById('atsTestResult').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('atsTestResult').style.display = 'block';
+                
+                showStatus('✅ ATS workflow test completed! Check if renamed files were created.', 'success');
+                
+                // Refresh the renamed files list to show new files
+                setTimeout(refreshRenamedFiles, 1000);
+                
+            } catch (error) {
+                showStatus(`❌ ATS workflow test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

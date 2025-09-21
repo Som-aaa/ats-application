@@ -1,0 +1,50 @@
+.ats-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 600px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  transition: box-shadow 0.2s;
+}
+.ats-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+}
+.ats-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1976d2;
+}
+.ats-score {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+.ats-score-high {
+  background: #e3fcec;
+  color: #388e3c;
+}
+.ats-score-low {
+  background: #ffebee;
+  color: #d32f2f;
+}
+.ats-section {
+  margin-bottom: 1.2rem;
+}
+.ats-strengths ul, .ats-weaknesses ul, .ats-matched-skills ul, .ats-gaps ul, .ats-suggestions ul {
+  margin: 0.5rem 0 0 1.2rem;
+  padding: 0;
+}
+.ats-strengths strong { color: #388e3c; }
+.ats-weaknesses strong, .ats-gaps strong { color: #d32f2f; }
+.ats-suggestions strong { color: #1976d2; }
+@media (max-width: 700px) {
+  .ats-card {
+    padding: 1rem;
+    max-width: 98vw;
+  }
+} 

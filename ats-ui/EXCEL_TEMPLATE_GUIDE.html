@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Template Guide for Job Descriptions</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .tip {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .step {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        .download-btn:hover {
+            background: #218838;
+        }
+        .column-header {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Excel Template Guide</h1>
+        <p>How to format your job descriptions Excel file for bulk analysis</p>
+    </div>
+
+    <div class="content">
+        <h2>📋 File Format Requirements</h2>
+        <p>Your Excel file should follow this <strong>3-column structure</strong> for optimal resume renaming:</p>
+        
+        <div class="step">
+            <h3>✅ Correct Format:</h3>
+            <ul>
+                <li><strong>File type:</strong> .xlsx or .xls</li>
+                <li><strong>Column A:</strong> Company Name</li>
+                <li><strong>Column B:</strong> Job Role/Title</li>
+                <li><strong>Column C:</strong> Job Description</li>
+                <li><strong>Skip the first row</strong> (it can be a header like "CompanyName", "Role", "Description")</li>
+                <li><strong>Maximum file size:</strong> 5MB</li>
+            </ul>
+        </div>
+
+        <h2>📝 Example Structure</h2>
+        <p>Here's how your Excel file should look:</p>
+        
+        <div class="example">
+Row 1: CompanyName | Role | Description (header - optional)
+Row 2: Markforged | Software Engineer II | The text describes Markforged as a company leading the digital transformation...
+Row 3: Microsoft | Data Scientist | We need a specialist in machine learning, Python programming...
+Row 4: Apple | Product Manager | We are seeking a product leader with 3+ years experience...
+        </div>
+
+        <h2>🔑 Why This Format?</h2>
+        <div class="tip">
+            <h3>💡 Benefits of the 3-column format:</h3>
+            <ul>
+                <li><strong>Accurate Resume Renaming:</strong> Company and role names are extracted directly from your Excel columns</li>
+                <li><strong>No AI Extraction Errors:</strong> Eliminates the need for AI to guess company/role from description text</li>
+                <li><strong>Personalized Naming:</strong> Resumes will be renamed as: <code>Username_CompanyName_RoleName_ID</code></li>
+                <li><strong>Better Organization:</strong> Clear separation of company, role, and description information</li>
+            </ul>
+        </div>
+
+        <h2>⚠️ Important Notes</h2>
+        <div class="warning">
+            <h3>🚫 What NOT to do:</h3>
+            <ul>
+                <li>Don't put job descriptions in other columns (D, E, F, etc.)</li>
+                <li>Don't merge cells</li>
+                <li>Don't use complex formatting or formulas</li>
+                <li>Don't include images or charts</li>
+                <li>Don't put company/role info in the description column</li>
+            </ul>
+        </div>
+
+        <div class="tip">
+            <h3>💡 Pro Tips:</h3>
+            <ul>
+                <li><strong>Company Names:</strong> Use consistent naming (e.g., "Google Inc" not "Google, Inc." or "Google")</li>
+                <li><strong>Role Titles:</strong> Be specific but concise (e.g., "Senior Software Engineer" not "Software Engineer II")</li>
+                <li><strong>Descriptions:</strong> Keep detailed but focused on requirements and responsibilities</li>
+                <li><strong>Test First:</strong> Try with a small file (2-3 job descriptions) before bulk processing</li>
+            </ul>
+        </div>
+
+        <h2>🔧 How to Create the File</h2>
+        <div class="step">
+            <h3>Step-by-step instructions:</h3>
+            <ol>
+                <li>Open Excel, Google Sheets, or any spreadsheet application</li>
+                <li><strong>Column A:</strong> Start typing company names</li>
+                <li><strong>Column B:</strong> Add corresponding job roles/titles</li>
+                <li><strong>Column C:</strong> Write detailed job descriptions</li>
+                <li>Each job posting goes in a separate row</li>
+                <li>Save the file as .xlsx or .xls format</li>
+                <li>Upload to our system and analyze!</li>
+            </ol>
+        </div>
+
+        <h2>📥 Download Sample Template</h2>
+        <p>Need a starting point? Download our sample template:</p>
+        <a href="#" class="download-btn" onclick="downloadTemplate()">📥 Download Sample Template</a>
+        
+        <div class="tip">
+            <p><strong>Note:</strong> The sample template contains example job descriptions that you can replace with your own.</p>
+        </div>
+
+        <h2>🚀 Ready to Get Started?</h2>
+        <p>Once you have your Excel file ready:</p>
+        <ol>
+            <li>Go back to the main application</li>
+            <li>Select "Bulk JD Analysis" mode</li>
+            <li>Upload your resumes (up to 20 files)</li>
+            <li>Upload your Excel file with job descriptions</li>
+            <li>Click "Analyze Resumes & Job Descriptions"</li>
+            <li>Get comprehensive results with automatically renamed resumes!</li>
+        </ol>
+
+        <h2>🎯 Expected Results</h2>
+        <div class="step">
+            <p>With this format, your resumes will be automatically renamed as:</p>
+            <ul>
+                <li><code>Saikrishna_Markforged_SoftwareEngineerII_123456</code></li>
+                <li><code>Saikrishna_Microsoft_DataScientist_789012</code></li>
+                <li><code>Saikrishna_Apple_ProductManager_345678</code></li>
+            </ul>
+            <p>This makes it easy to identify which resume matches which company and role! The username is automatically extracted from the first line of your resume.</p>
+            
+            <div class="tip">
+                <h3>💡 Important Note:</h3>
+                <p><strong>Only the best match resume for each job description gets renamed.</strong> This ensures you have exactly one renamed file per job opening for the top candidate.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function downloadTemplate() {
+            // Create a sample CSV content with the new 3-column format
+            const csvContent = "CompanyName,Role,Description\n" +
+                "Markforged,Software Engineer II,The text describes Markforged as a company leading the digital transformation of manufacturing by revolutionizing how engineers and manufacturers create and innovate. Their platform combines software, advanced materials (including cutting-edge metal and composite technologies), and industrial 3D printers to deliver strong, lightweight parts.\n" +
+                "Microsoft,Data Scientist,We need a specialist in machine learning, Python programming, and statistical analysis. Must have experience with pandas, scikit-learn, and data visualization tools. Knowledge of SQL, big data technologies, and business intelligence tools preferred.\n" +
+                "Apple,Product Manager,We are seeking a product leader with 3+ years experience in agile methodologies, user research, and product strategy. Must have strong analytical skills, experience with product analytics tools, and ability to work with cross-functional teams. Technical background is a plus.\n" +
+                "Google,Senior Software Engineer,We are looking for a talented developer with 5+ years of experience in Java, Spring Boot, and microservices architecture. Must have strong knowledge of REST APIs, database design, and cloud platforms like AWS or Azure. Experience with CI/CD pipelines and agile development methodologies required.";
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'job_descriptions_template_3columns.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            alert('Template downloaded! You can open this in Excel and save as .xlsx format. The 3-column structure will ensure accurate resume renaming!');
+        }
+    </script>
+</body>
+</html>

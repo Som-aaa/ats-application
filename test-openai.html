@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 12px 24px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        pre { background-color: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; border: 1px solid #e9ecef; }
+        .upload-area { border: 2px dashed #007bff; padding: 40px; text-align: center; margin: 20px 0; border-radius: 10px; }
+        .upload-area.dragover { background-color: #e3f2fd; border-color: #2196f3; }
+        input[type="file"] { display: none; }
+        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin: 10px 0; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .loading { background-color: #fff3cd; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 OpenAI API Test - ATS Application</h1>
+        <p>This page will help you verify that your application is making calls to OpenAI API.</p>
+        
+        <div class="test-section info">
+            <h3>📊 Instructions</h3>
+            <ol>
+                <li>First, test if the backend is running</li>
+                <li>Then upload a resume to trigger an OpenAI API call</li>
+                <li>Check your OpenAI dashboard for new requests</li>
+                <li>Monitor the response and costs</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>1. Backend Health Check</h3>
+            <button onclick="testBackend()">Test Backend Connection</button>
+            <div id="backend-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. OpenAI API Test (Mode 1)</h3>
+            <p>Upload a resume to trigger an OpenAI API call:</p>
+            
+            <div class="upload-area" onclick="document.getElementById('resume-file').click()">
+                <p>📄 Click here to upload a resume (PDF, DOCX, TXT)</p>
+                <input type="file" id="resume-file" accept=".pdf,.docx,.txt" onchange="handleFileSelect()">
+            </div>
+            
+            <div id="upload-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. OpenAI API Test (Mode 2)</h3>
+            <p>Upload a resume and add a job description:</p>
+            
+            <div class="upload-area" onclick="document.getElementById('resume-file-2').click()">
+                <p>📄 Click here to upload a resume for Mode 2</p>
+                <input type="file" id="resume-file-2" accept=".pdf,.docx,.txt" onchange="handleFileSelect2()">
+            </div>
+            
+            <label for="job-description">Job Description:</label>
+            <textarea id="job-description" placeholder="Paste a job description here...">Software Engineer with 3+ years of experience in Java, Spring Boot, and web development. Must have experience with REST APIs, databases, and cloud platforms.</textarea>
+            
+            <button onclick="testMode2()" id="mode2-btn" disabled>Test Mode 2 (Resume + Job Description)</button>
+            <div id="mode2-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Cache Management</h3>
+            <button onclick="clearCache()">Clear Cache</button>
+            <button onclick="checkCacheStatus()">Check Cache Status</button>
+            <div id="cache-result"></div>
+        </div>
+
+        <div class="test-section info">
+            <h3>📈 What to Check in OpenAI Dashboard</h3>
+            <ul>
+                <li><strong>Usage:</strong> Look for new API calls in the last few minutes</li>
+                <li><strong>Model:</strong> Should show "gpt-3.5-turbo" (cost optimized)</li>
+                <li><strong>Tokens:</strong> Input and output token usage</li>
+                <li><strong>Cost:</strong> Should be much lower than GPT-4 (~97.5% savings)</li>
+                <li><strong>Requests:</strong> New requests should appear after each upload</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let selectedFile = null;
+        let selectedFile2 = null;
+
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = '<div class="status loading">Testing backend connection...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Backend is Running!</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Backend Connection Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Make sure the Spring Boot application is running on port 8080.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function handleFileSelect() {
+            const fileInput = document.getElementById('resume-file');
+            selectedFile = fileInput.files[0];
+            
+            if (selectedFile) {
+                document.getElementById('upload-result').innerHTML = `
+                    <div class="info">
+                        <p>📄 Selected: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(1)} KB)</p>
+                        <button onclick="testMode1()">🚀 Test Mode 1 - Upload Resume</button>
+                    </div>
+                `;
+            }
+        }
+
+        function handleFileSelect2() {
+            const fileInput = document.getElementById('resume-file-2');
+            selectedFile2 = fileInput.files[0];
+            
+            if (selectedFile2) {
+                document.getElementById('mode2-btn').disabled = false;
+                document.getElementById('mode2-result').innerHTML = `
+                    <div class="info">
+                        <p>📄 Selected: ${selectedFile2.name} (${(selectedFile2.size / 1024).toFixed(1)} KB)</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMode1() {
+            if (!selectedFile) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('upload-result');
+            resultDiv.innerHTML = '<div class="status loading">🔄 Processing resume with OpenAI API...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('resume', selectedFile);
+                
+                const response = await fetch(`${API_BASE}/mode1`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Mode 1 Success! OpenAI API Call Made</h4>
+                        <p><strong>ATS Score:</strong> ${data.atsScore?.[0] || 'N/A'}/10</p>
+                        <p><strong>Career Summary:</strong> ${data.careerSummary?.[0]?.substring(0, 100)}...</p>
+                        <p><strong>Check your OpenAI dashboard for the API call!</strong></p>
+                        <details>
+                            <summary>View Full Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Mode 1 Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Check the console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMode2() {
+            if (!selectedFile2) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const jobDescription = document.getElementById('job-description').value;
+            if (!jobDescription.trim()) {
+                alert('Please enter a job description!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('mode2-result');
+            resultDiv.innerHTML = '<div class="status loading">🔄 Processing resume + job description with OpenAI API...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('resume', selectedFile2);
+                formData.append('jd', jobDescription);
+                
+                const response = await fetch(`${API_BASE}/mode2`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Mode 2 Success! OpenAI API Call Made</h4>
+                        <p><strong>Match Score:</strong> ${data.atsScore?.[0] || 'N/A'}/10</p>
+                        <p><strong>Career Summary:</strong> ${data.careerSummary?.[0]?.substring(0, 100)}...</p>
+                        <p><strong>Check your OpenAI dashboard for the API call!</strong></p>
+                        <details>
+                            <summary>View Full Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Mode 2 Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Check the console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function clearCache() {
+            try {
+                const response = await fetch(`${API_BASE}/clear-cache`, { method: 'POST' });
+                const data = await response.json();
+                document.getElementById('cache-result').innerHTML = `
+                    <div class="success">
+                        <h4>✅ Cache Cleared</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('cache-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Clear Cache Failed</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        async function checkCacheStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/cache-status`);
+                const data = await response.json();
+                document.getElementById('cache-result').innerHTML = `
+                    <div class="info">
+                        <h4>📊 Cache Status</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('cache-result').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Cache Status Failed</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-test backend on page load
+        window.onload = function() {
+            setTimeout(testBackend, 1000);
+        };
+    </script>
+</body>
+</html> 

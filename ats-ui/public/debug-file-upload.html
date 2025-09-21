@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug File Upload - ATS Application</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .test-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-warning {
+            background: #f39c12;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .file-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Debug File Upload</h1>
+            <p>Test file uploads to identify corruption issues</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📁 Select a File to Test</h3>
+            <div class="file-input">
+                <input type="file" id="fileInput" accept="*/*">
+                <p>Choose a file (PDF, DOC, etc.) to test</p>
+            </div>
+            
+            <div id="fileInfo" class="file-info" style="display: none;"></div>
+            
+            <div>
+                <button class="btn" onclick="testDirectUpload()">🎯 Test Direct Upload</button>
+                <button class="btn btn-warning" onclick="testRawUpload()">🔍 Test Raw Upload</button>
+                <button class="btn btn-success" onclick="testProcessUpload()">⚙️ Test Process Upload</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Test Results</h3>
+            <div id="results"></div>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                displayFileInfo(file);
+                showStatus(`File selected: ${file.name}`, 'info');
+            }
+        });
+
+        function displayFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            fileInfo.innerHTML = `
+                <strong>File Information:</strong><br>
+                Name: ${file.name}<br>
+                Size: ${file.size} bytes (${(file.size / 1024).toFixed(2)} KB)<br>
+                Type: ${file.type || 'Unknown'}<br>
+                Last Modified: ${new Date(file.lastModified).toLocaleString()}
+            `;
+            fileInfo.style.display = 'block';
+        }
+
+        async function testDirectUpload() {
+            if (!selectedFile) {
+                showStatus('Please select a file first', 'error');
+                return;
+            }
+
+            showStatus('Testing direct file upload...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                const response = await fetch('/api/file-renamer/test-direct', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Direct upload failed');
+                }
+                
+                // Download the file to test
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = 'direct-test-' + selectedFile.name;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(downloadUrl);
+                
+                showStatus('✅ Direct upload test completed! Check console for debug info.', 'success');
+                addResult('Direct Upload', 'Success', 'File downloaded successfully');
+                
+            } catch (error) {
+                showStatus(`❌ Direct upload failed: ${error.message}`, 'error');
+                addResult('Direct Upload', 'Failed', error.message);
+            }
+        }
+
+        async function testRawUpload() {
+            if (!selectedFile) {
+                showStatus('Please select a file first', 'error');
+                return;
+            }
+
+            showStatus('Testing raw file upload...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            try {
+                const response = await fetch('/api/file-renamer/test-raw', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Raw upload failed');
+                }
+                
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = downloadUrl;
+                downloadLink.download = 'raw-test-' + selectedFile.name;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                URL.revokeObjectURL(downloadUrl);
+                
+                showStatus('✅ Raw upload test completed!', 'success');
+                addResult('Raw Upload', 'Success', 'File downloaded successfully');
+                
+            } catch (error) {
+                showStatus(`❌ Raw upload failed: ${error.message}`, 'error');
+                addResult('Raw Upload', 'Failed', error.message);
+            }
+        }
+
+        async function testProcessUpload() {
+            if (!selectedFile) {
+                showStatus('Please select a file first', 'error');
+                return;
+            }
+
+            showStatus('Testing process upload...', 'info');
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('companyName', 'TestCompany');
+            formData.append('roleName', 'TestRole');
+            
+            try {
+                const response = await fetch('/api/file-renamer/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Process failed');
+                }
+                
+                const result = await response.json();
+                showStatus('✅ Process upload test completed!', 'success');
+                addResult('Process Upload', 'Success', `New filename: ${result.data.newFileName}`);
+                
+            } catch (error) {
+                showStatus(`❌ Process upload failed: ${error.message}`, 'error');
+                addResult('Process Upload', 'Failed', error.message);
+            }
+        }
+
+        function addResult(test, status, message) {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.style.padding = '10px';
+            resultDiv.style.margin = '5px 0';
+            resultDiv.style.borderRadius = '5px';
+            resultDiv.style.backgroundColor = status === 'Success' ? '#d4edda' : '#f8d7da';
+            resultDiv.style.color = status === 'Success' ? '#155724' : '#721c24';
+            
+            resultDiv.innerHTML = `<strong>${test}:</strong> ${status} - ${message}`;
+            results.appendChild(resultDiv);
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .loading { background: #fff3cd; color: #856404; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input[type="file"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>ATS API Test Page</h1>
+    
+    <div class="container">
+        <h2>Health Check</h2>
+        <button onclick="testHealth()">Test Backend Health</button>
+        <div id="health-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Mode 1 Test (Resume Only)</h2>
+        <input type="file" id="resume-file" accept=".pdf,.doc,.docx,.txt">
+        <button onclick="testMode1()">Test Mode 1</button>
+        <div id="mode1-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Mode 2 Test (Resume + Job Description)</h2>
+        <input type="file" id="resume-file2" accept=".pdf,.doc,.docx,.txt">
+        <textarea id="job-description" placeholder="Paste job description here..."></textarea>
+        <button onclick="testMode2()">Test Mode 2</button>
+        <div id="mode2-result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Mode 3 Test (Bulk Resume Analysis)</h2>
+        <input type="file" id="resume-files" accept=".pdf,.doc,.docx,.txt" multiple>
+        <textarea id="job-description-bulk" placeholder="Paste job description here..."></textarea>
+        <button onclick="testMode3()">Test Mode 3</button>
+        <div id="mode3-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<div class="status loading">🔄 Testing backend health...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                console.log('Health check response:', response);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Backend is Healthy!</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Health check error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Backend Health Check Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Make sure the backend is running on port 8080</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMode1() {
+            const selectedFile = document.getElementById('resume-file').files[0];
+            if (!selectedFile) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('mode1-result');
+            resultDiv.innerHTML = '<div class="status loading">🔄 Processing resume with OpenAI API...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('resume', selectedFile);
+                
+                console.log('Mode 1 request:', {
+                    url: `${API_BASE}/mode1`,
+                    file: selectedFile.name,
+                    fileSize: selectedFile.size
+                });
+                
+                const response = await fetch(`${API_BASE}/mode1`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Mode 1 response:', response);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Mode 1 error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Mode 1 Success! OpenAI API Call Made</h4>
+                        <p><strong>ATS Score:</strong> ${data.atsScore?.[0] || 'N/A'}/10</p>
+                        <p><strong>Career Summary:</strong> ${data.careerSummary?.[0]?.substring(0, 100)}...</p>
+                        <p><strong>Check your OpenAI dashboard for the API call!</strong></p>
+                        <details>
+                            <summary>View Full Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Mode 1 error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Mode 1 Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Check the console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMode2() {
+            const selectedFile2 = document.getElementById('resume-file2').files[0];
+            if (!selectedFile2) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const jobDescription = document.getElementById('job-description').value;
+            if (!jobDescription.trim()) {
+                alert('Please enter a job description!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('mode2-result');
+            resultDiv.innerHTML = '<div class="status loading">🔄 Processing resume + job description with OpenAI API...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('resume', selectedFile2);
+                formData.append('jd', jobDescription);
+                
+                console.log('Mode 2 request:', {
+                    url: `${API_BASE}/mode2`,
+                    file: selectedFile2.name,
+                    fileSize: selectedFile2.size,
+                    jdLength: jobDescription.length
+                });
+                
+                const response = await fetch(`${API_BASE}/mode2`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Mode 2 response:', response);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Mode 2 error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Mode 2 Success! OpenAI API Call Made</h4>
+                        <p><strong>Match Score:</strong> ${data.atsScore?.[0] || 'N/A'}/10</p>
+                        <p><strong>Career Summary:</strong> ${data.careerSummary?.[0]?.substring(0, 100)}...</p>
+                        <p><strong>Check your OpenAI dashboard for the API call!</strong></p>
+                        <details>
+                            <summary>View Full Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Mode 2 error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Mode 2 Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Check the console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testMode3() {
+            const selectedFiles = document.getElementById('resume-files').files;
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one file!');
+                return;
+            }
+
+            const jobDescription = document.getElementById('job-description-bulk').value;
+            if (!jobDescription.trim()) {
+                alert('Please enter a job description!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('mode3-result');
+            resultDiv.innerHTML = '<div class="status loading">🔄 Processing multiple resumes with OpenAI API...</div>';
+            
+            try {
+                const formData = new FormData();
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    formData.append('resumes', selectedFiles[i]);
+                }
+                formData.append('jd', jobDescription);
+                
+                console.log('Mode 3 request:', {
+                    url: `${API_BASE}/mode3`,
+                    files: Array.from(selectedFiles).map(f => f.name),
+                    totalFiles: selectedFiles.length,
+                    jdLength: jobDescription.length
+                });
+                
+                const response = await fetch(`${API_BASE}/mode3`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Mode 3 response:', response);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Mode 3 error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Mode 3 Success! Bulk Analysis Completed</h4>
+                        <p><strong>Total Resumes:</strong> ${data.summary?.totalResumes || 0}</p>
+                        <p><strong>Best Match:</strong> ${data.summary?.bestMatch?.resumeName || 'N/A'} (Score: ${data.summary?.bestMatch?.atsScore?.[0] || 'N/A'}/10)</p>
+                        <p><strong>Average Score:</strong> ${data.summary?.averageScore || 'N/A'}/10</p>
+                        <p><strong>Check your OpenAI dashboard for the API calls!</strong></p>
+                        <details>
+                            <summary>View Full Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Mode 3 error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Mode 3 Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Check the console for more details.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-test health on page load
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html> 

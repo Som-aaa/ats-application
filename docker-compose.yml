@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  ats-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - JAVA_OPTS=-Xms512m -Xmx2g -XX:+UseG1GC
+    volumes:
+      - ./logs:/app/logs
+      - ./api-key.txt:/app/api-key.txt:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health/liveness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ats-network
+
+  # Optional: Add a reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - ats-app
+    restart: unless-stopped
+    networks:
+      - ats-network
+
+networks:
+  ats-network:
+    driver: bridge
+
+volumes:
+  logs:
