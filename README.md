@@ -106,19 +106,64 @@
 
 ## How to Run
 
-1. **Backend:**
-   - Ensure Java 17+ and Maven are installed.
-   - Set your OpenAI API key in `api-key.txt`.
-   - Run: `mvn spring-boot:run`
+### Prerequisites
+- Java 17 or higher
+- Node.js 16 or higher
+- OpenAI API key
 
-2. **Frontend:**
-   - Navigate to `ats-ui/`
-   - Install dependencies: `npm install`
-   - Start the app: `npm start`
-   - Access at [http://localhost:3000](http://localhost:3000)
+### 1. Backend Setup
+```bash
+# Navigate to the project root
+cd ATS
 
-3. **Testing:**
-   - Use `test-api.html` for direct API testing.
+# Set up environment variables (Recommended)
+cp .env.example .env
+# Edit .env file and add your OpenAI API key:
+# OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Run the Spring Boot application
+./mvnw spring-boot:run
+```
+
+The backend will start on `http://localhost:8080`
+
+### 🔐 API Key Setup (Important!)
+
+**Option 1: Using .env file (Recommended)**
+1. Copy the example file: `cp .env.example .env`
+2. Edit `.env` and add your API key: `OPENAI_API_KEY=sk-your-openai-api-key-here`
+3. The `.env` file is already in `.gitignore` so it won't be pushed to GitHub
+
+**Option 2: Using environment variable**
+```bash
+# Windows
+set OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Linux/Mac
+export OPENAI_API_KEY=sk-your-openai-api-key-here
+```
+
+**Option 3: Using api-key.txt file (Legacy)**
+```bash
+echo "your-openai-api-key-here" > api-key.txt
+```
+
+### 2. Frontend Setup
+```bash
+# Navigate to frontend directory
+cd ats-ui/
+
+# Install dependencies
+npm install
+
+# Start the app
+npm start
+```
+
+Access at [http://localhost:3000](http://localhost:3000)
+
+### 3. Testing
+- Use `test-api.html` for direct API testing.
 
 ---
 
