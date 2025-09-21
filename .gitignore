@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### API Keys and Secrets ###
+api-key.txt
+*.key
+.env
+.env.local
+.env.production
+.env.staging
