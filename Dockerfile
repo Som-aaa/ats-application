@@ -17,6 +17,9 @@ RUN mvn dependency:go-offline -B
 # Copy source code
 COPY src ./src
 
+# Add build timestamp to force cache invalidation
+RUN echo "Build timestamp: $(date)" > build-info.txt
+
 # Build the application
 RUN mvn clean package -DskipTests
 
