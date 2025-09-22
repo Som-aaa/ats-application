@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ats-application
+    env: java
+    plan: free
+    buildCommand: mvn clean package -DskipTests
+    startCommand: ./start-render.sh
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: OPENAI_API_KEY
+        fromSecret: openai_api_key
+      - key: PORT
+        value: 10000
+    healthCheckPath: /actuator/health
+    disk:
+      name: logs
+      mountPath: /app/logs
+      sizeGB: 1
