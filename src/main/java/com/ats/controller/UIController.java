@@ -12,7 +12,7 @@ public class UIController {
     /**
      * Serve the React app for all non-API routes
      */
-    @GetMapping(value = {"/", "/{path:[^\\.]*}", "/**/{path:^(?!api).*}/**"})
+    @GetMapping(value = {"/", "/{path:[^\\.]*}"})
     public String index() {
         return "forward:/index.html";
     }
