@@ -3,7 +3,7 @@ services:
     name: ats-application
     env: java
     plan: free
-    buildCommand: cd ats-ui && npm install && npm run build && cd .. && mvn clean package -DskipTests
+    buildCommand: mvn clean package -DskipTests
     startCommand: ./start-render.sh
     envVars:
       - key: SPRING_PROFILES_ACTIVE
