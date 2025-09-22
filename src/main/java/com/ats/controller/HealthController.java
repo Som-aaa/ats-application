@@ -105,6 +105,16 @@ public class HealthController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getBasicHealth() {
+        Map<String, Object> health = new HashMap<>();
+        health.put("status", "UP");
+        health.put("message", "ATS Application is running successfully!");
+        health.put("timestamp", System.currentTimeMillis());
+        health.put("service", "ATS Application");
+        return ResponseEntity.ok(health);
+    }
+
     private Map<String, Object> checkApiKey() {
         Map<String, Object> apiKeyStatus = new HashMap<>();
         try {
