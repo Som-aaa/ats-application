@@ -82,3 +82,57 @@ Identify and stop the process that's listening on port 8080 or configure this ap
 2025-09-22 08:23:38 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
 2025-09-22 08:23:38 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
 2025-09-22 08:23:43 [restartedMain] INFO  com.ats.AtsApplication - Started AtsApplication in 7.071 seconds (process running for 224.825)
+2025-09-22 08:42:59 [restartedMain] INFO  com.ats.AtsApplication - Starting AtsApplication using Java 17.0.8.1 with PID 26836 (C:\Users\soma\Downloads\ATS_Main\ATS\target\classes started by soma in C:\Users\soma\Downloads\ATS_Main\ATS)
+2025-09-22 08:42:59 [restartedMain] INFO  com.ats.AtsApplication - The following 1 profile is active: "production"
+2025-09-22 08:43:01 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-22 08:43:01 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-22 08:43:01 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-22 08:43:02 [restartedMain] INFO  com.ats.AtsApplication - Started AtsApplication in 3.148 seconds (process running for 1383.608)
+2025-09-22 08:43:03 [restartedMain] INFO  com.ats.AtsApplication - Starting AtsApplication using Java 17.0.8.1 with PID 26836 (C:\Users\soma\Downloads\ATS_Main\ATS\target\classes started by soma in C:\Users\soma\Downloads\ATS_Main\ATS)
+2025-09-22 08:43:03 [restartedMain] INFO  com.ats.AtsApplication - The following 1 profile is active: "production"
+2025-09-22 08:43:05 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-22 08:43:05 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-22 08:43:05 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-22 08:43:06 [restartedMain] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Invalid mapping on handler class [com.ats.controller.UIController]: public java.lang.String com.ats.controller.UIController.index()
+2025-09-22 08:43:06 [restartedMain] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-09-22 08:43:06 [restartedMain] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Invalid mapping pattern detected:
+/**/{path:^(?!api).*}/**
+^
+No more pattern data allowed after {*...} or ** pattern element
+
+Action:
+
+Fix this pattern in your application or switch to the legacy parser implementation with 'spring.mvc.pathmatch.matching-strategy=ant_path_matcher'.
+
+2025-09-22 08:43:43 [restartedMain] INFO  com.ats.AtsApplication - Starting AtsApplication using Java 17.0.8.1 with PID 26836 (C:\Users\soma\Downloads\ATS_Main\ATS\target\classes started by soma in C:\Users\soma\Downloads\ATS_Main\ATS)
+2025-09-22 08:43:43 [restartedMain] INFO  com.ats.AtsApplication - The following 1 profile is active: "production"
+2025-09-22 08:43:44 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-22 08:43:44 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-09-22 08:43:44 [restartedMain] INFO  o.a.c.c.C.[Tomcat-1].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-22 08:43:45 [restartedMain] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/autoconfigure/web/servlet/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Invalid mapping on handler class [com.ats.controller.UIController]: public java.lang.String com.ats.controller.UIController.index()
+2025-09-22 08:43:45 [restartedMain] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-09-22 08:43:45 [restartedMain] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Invalid mapping pattern detected:
+/**/{path:^(?!api).*}/**
+^
+No more pattern data allowed after {*...} or ** pattern element
+
+Action:
+
+Fix this pattern in your application or switch to the legacy parser implementation with 'spring.mvc.pathmatch.matching-strategy=ant_path_matcher'.
+
