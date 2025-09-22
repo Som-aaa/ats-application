@@ -60,7 +60,8 @@ function UploadPage({ onResult }) {
     setError(null);
     try {
       const formData = new FormData();
-      let url = "http://localhost:8080/api/mode1";
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+      let url = `${API_BASE_URL}/api/mode1`;
       
       if (mode === 1) {
         if (!resumeFile) throw new Error("Resume file is required");
@@ -68,7 +69,7 @@ function UploadPage({ onResult }) {
       } else if (mode === 2) {
         if (!resumeFile) throw new Error("Resume file is required");
         if (!jdText.trim()) throw new Error("Job description is required");
-        url = "http://localhost:8080/api/mode2";
+        url = `${API_BASE_URL}/api/mode2`;
         formData.append("resume", resumeFile);
         formData.append("jd", jdText);
       } else if (mode === 4) {
@@ -76,7 +77,7 @@ function UploadPage({ onResult }) {
         console.log("Mode 4 - jdFile:", jdFile);
         if (resumeFiles.length === 0) throw new Error("At least one resume file is required");
         if (!jdFile) throw new Error("Job descriptions Excel file is required");
-        url = "http://localhost:8080/api/mode4";
+        url = `${API_BASE_URL}/api/mode4`;
         resumeFiles.forEach((file, index) => {
           console.log("Appending resume file:", file.name, "at index:", index);
           formData.append("resumes", file);

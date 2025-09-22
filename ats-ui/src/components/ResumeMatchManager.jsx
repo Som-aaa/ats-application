@@ -19,7 +19,8 @@ const ResumeMatchManager = () => {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/resume-matches');
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+      const response = await fetch(`${API_BASE_URL}/api/resume-matches`);
       if (response.ok) {
         const data = await response.json();
         setMatches(data);
@@ -35,7 +36,8 @@ const ResumeMatchManager = () => {
 
   const fetchStatistics = async () => {
     try {
-      const response = await fetch('/api/resume-matches/statistics');
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+      const response = await fetch(`${API_BASE_URL}/api/resume-matches/statistics`);
       if (response.ok) {
         const data = await response.json();
         setStatistics(data);
@@ -47,7 +49,8 @@ const ResumeMatchManager = () => {
 
   const fetchBestMatches = async () => {
     try {
-      const response = await fetch('/api/resume-matches/best-matches');
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+      const response = await fetch(`${API_BASE_URL}/api/resume-matches/best-matches`);
       if (response.ok) {
         const data = await response.json();
         setBestMatches(data);
@@ -61,7 +64,8 @@ const ResumeMatchManager = () => {
     try {
       console.log(`🚀 Starting download for JD ${jdIndex}...`);
       
-      const response = await fetch(`/api/resume-matches/job-description/${jdIndex}/download-best`);
+      const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+      const response = await fetch(`${API_BASE_URL}/api/resume-matches/job-description/${jdIndex}/download-best`);
       console.log(`📡 Response received:`, response);
       console.log(`📊 Response status: ${response.status}`);
       console.log(`📋 Response headers:`, response.headers);

@@ -11,6 +11,8 @@ services:
         fromSecret: openai_api_key
       - key: PORT
         value: 10000
+      - key: JAVA_OPTS
+        value: "-Xms256m -Xmx512m -XX:+UseG1GC"
     healthCheckPath: /actuator/health
     disk:
       name: logs

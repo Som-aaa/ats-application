@@ -19,8 +19,11 @@ public class AtsApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/api/**")
-					.allowedOrigins("http://localhost:3000", "https://ats-application.onrender.com")
-					.allowedMethods("POST", "GET", "OPTIONS");
+					.allowedOriginPatterns("*")
+					.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+					.allowedHeaders("*")
+					.allowCredentials(true)
+					.maxAge(3600);
 			}
 		};
 	}

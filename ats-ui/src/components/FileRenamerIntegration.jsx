@@ -42,7 +42,8 @@ const FileRenamerIntegration = () => {
             }
 
             // Process the file
-            const processResponse = await fetch('/api/file-renamer/process', {
+            const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+            const processResponse = await fetch(`${API_BASE_URL}/api/file-renamer/process`, {
                 method: 'POST',
                 body: formData
             });
@@ -75,7 +76,8 @@ const FileRenamerIntegration = () => {
         try {
             console.log('DEBUG - React: Starting FileSystemResource download...');
             
-            const response = await fetch('/api/file-renamer/download', {
+            const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+            const response = await fetch(`${API_BASE_URL}/api/file-renamer/download`, {
                 method: 'POST',
                 body: formData
             });
